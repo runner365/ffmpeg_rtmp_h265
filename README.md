@@ -1,6 +1,7 @@
 # 在ffmpeg中支持hevc的rtmp协议
 
-当前阿里云，金山云等众多cdn，已经支持hevc编码的rtmp直播。
+当前阿里云，金山云等众多cdn，已经支持hevc编码的rtmp直播。<br>
+本库基于ffmpeg4.1
 
 ## rtmp codecid
 hevc在rtmp中的codecid没有官方协议定义，由国内众多知名cdn共同制定。
