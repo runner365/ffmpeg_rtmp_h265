@@ -209,6 +209,8 @@ static int flv_same_audio_codec(AVCodecParameters *apar, int flags)
     case FLV_CODECID_PCM_ALAW:
         return apar->sample_rate == 8000 &&
                apar->codec_id    == AV_CODEC_ID_PCM_ALAW;
+    case FLV_CODECID_OPUS:
+        return apar->codec_id == AV_CODEC_ID_OPUS;
     default:
         return apar->codec_tag == (flv_codecid >> FLV_AUDIO_CODECID_OFFSET);
     }
@@ -266,6 +268,9 @@ static void flv_set_audio_codec(AVFormatContext *s, AVStream *astream,
     case FLV_CODECID_PCM_ALAW:
         apar->sample_rate = 8000;
         apar->codec_id    = AV_CODEC_ID_PCM_ALAW;
+        break;
+    case FLV_CODECID_OPUS:
+        apar->codec_id    = AV_CODEC_ID_OPUS;
         break;
     default:
         avpriv_request_sample(s, "Audio codec (%x)",
@@ -1126,6 +1131,13 @@ retry_duration:
         sample_rate = 44100 << ((flags & FLV_AUDIO_SAMPLERATE_MASK) >>
                                 FLV_AUDIO_SAMPLERATE_OFFSET) >> 3;
         bits_per_coded_sample = (flags & FLV_AUDIO_SAMPLESIZE_MASK) ? 16 : 8;
+
+        if (st->codecpar->codec_id == AV_CODEC_ID_OPUS) {
+            channels              = 2;
+            sample_rate           = 48000;
+            bits_per_coded_sample = 16;
+        }
+
         if (!st->codecpar->channels || !st->codecpar->sample_rate ||
             !st->codecpar->bits_per_coded_sample) {
             st->codecpar->channels              = channels;
@@ -1166,7 +1178,8 @@ retry_duration:
     if (st->codecpar->codec_id == AV_CODEC_ID_AAC ||
         st->codecpar->codec_id == AV_CODEC_ID_H264 ||
         st->codecpar->codec_id == AV_CODEC_ID_MPEG4 ||
-        st->codecpar->codec_id == AV_CODEC_ID_HEVC) {
+        st->codecpar->codec_id == AV_CODEC_ID_HEVC ||
+        st->codecpar->codec_id == AV_CODEC_ID_OPUS) {
         int type = avio_r8(s->pb);
         size--;
 
@@ -1192,7 +1205,8 @@ retry_duration:
             }
         }
         if (type == 0 && (!st->codecpar->extradata || st->codecpar->codec_id == AV_CODEC_ID_AAC ||
-            st->codecpar->codec_id == AV_CODEC_ID_H264 || st->codecpar->codec_id == AV_CODEC_ID_HEVC)) {
+            st->codecpar->codec_id == AV_CODEC_ID_H264 || st->codecpar->codec_id == AV_CODEC_ID_HEVC ||
+            st->codecpar->codec_id == AV_CODEC_ID_OPUS)) {
             AVDictionaryEntry *t;
 
             if (st->codecpar->extradata) {
@@ -1208,22 +1222,6 @@ retry_duration:
             t = av_dict_get(s->metadata, "Encoder", NULL, 0);
             if (st->codecpar->codec_id == AV_CODEC_ID_AAC && t && !strcmp(t->value, "Omnia A/XE"))
                 st->codecpar->extradata_size = 2;
-
-            if (st->codecpar->codec_id == AV_CODEC_ID_AAC && 0) {
-                MPEG4AudioConfig cfg;
-
-                if (avpriv_mpeg4audio_get_config(&cfg, st->codecpar->extradata,
-                                                 st->codecpar->extradata_size * 8, 1) >= 0) {
-                st->codecpar->channels       = cfg.channels;
-                st->codecpar->channel_layout = 0;
-                if (cfg.ext_sample_rate)
-                    st->codecpar->sample_rate = cfg.ext_sample_rate;
-                else
-                    st->codecpar->sample_rate = cfg.sample_rate;
-                av_log(s, AV_LOG_TRACE, "mp4a config channels %d sample rate %d\n",
-                        st->codecpar->channels, st->codecpar->sample_rate);
-                }
-            }
 
             ret = FFERROR_REDO;
             goto leave;
