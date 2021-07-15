@@ -1,13 +1,14 @@
-# 在ffmpeg中支持hevc的rtmp协议
+# 在ffmpeg中支持hevc/vp8/vp9/opus的flv格式
 
 当前阿里云，金山云等众多cdn，已经支持hevc编码的rtmp直播。<br>
 本库基于ffmpeg4.1
 
 ## rtmp codecid
-hevc在rtmp中的codecid没有官方协议定义，由国内众多知名cdn共同制定。
-FLV_CODECID_HEVC = 12
+hevc/vp8/vp9/opus在rtmp中的codecid没有官方协议定义，由国内众多知名cdn共同制定。
 <pre>
 <code>
+FLV_CODECID_OPUS = 9 << FLV_AUDIO_CODECID_OFFSET
+
 enum {
     FLV_CODECID_H263    = 2,
     FLV_CODECID_SCREEN  = 3,
@@ -18,6 +19,9 @@ enum {
     FLV_CODECID_REALH263= 8,
     FLV_CODECID_MPEG4   = 9,
     FLV_CODECID_HEVC    = 12,
+    FLV_CODECID_AV1     = 13,
+    FLV_CODECID_VP8     = 14,
+    FLV_CODECID_VP9     = 15,
 };
 </code>
 </pre>
