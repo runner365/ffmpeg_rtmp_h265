@@ -1,7 +1,9 @@
 # 在ffmpeg中支持hevc/vp8/vp9/opus的flv格式
 
 当前阿里云，金山云等众多cdn，已经支持hevc编码的rtmp直播。<br>
-本库基于ffmpeg5.1
+本库支持的版本(见对应的branch分支):
+* 4.1
+* 5.1
 
 ## rtmp codecid
 hevc/vp8/vp9/opus在rtmp中的codecid没有官方协议定义，由国内众多知名cdn共同制定。
