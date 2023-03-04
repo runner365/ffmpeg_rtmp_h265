@@ -6,6 +6,7 @@
 * 4.3
 * 5.0
 * 5.1
+* 6.0
 
 ## rtmp codecid
 hevc/vp8/vp9/opus在rtmp中的codecid没有官方协议定义，由国内众多知名cdn共同制定。
