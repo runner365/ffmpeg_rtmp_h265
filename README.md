@@ -1,12 +1,16 @@
 # 在ffmpeg中支持hevc/vp8/vp9/opus的flv格式
+## 项目背景
+1. 当前阿里云，金山云等众多cdn，已经支持hevc编码的rtmp直播。
+2. 国外大厂和国外cdn支持hevc in rtmp/flv方式：[enhanced-rtmp](https://github.com/veovera/enhanced-rtmp)
 
-当前阿里云，金山云等众多cdn，已经支持hevc编码的rtmp直播。<br>
-本库支持的版本(见对应的branch分支):
+<b>基于兼容上面两种hevc in rtmp/flv的方式，本库均支持。<b>
+
+## 本库支持的版本(见对应的branch分支):
 * 4.1
 * 4.3
 * 5.0
 * 5.1
-* 6.0
+* 6.0(支持enhanced-rtmp)
 
 ## rtmp codecid
 hevc/vp8/vp9/opus在rtmp中的codecid没有官方协议定义，由国内众多知名cdn共同制定。
