@@ -38,7 +38,7 @@ enum {
 ## 国外大厂和cdn方式：[enhanced-rtmp](https://github.com/veovera/enhanced-rtmp)
 * mux/推流：需要设置: -f flv -flvflags ext_header
 ```markup
-ffmpeg -re -i source.flv -c:v libx265 -c:a copy -f flv -flvflags ext_header rtmp://172.28.202.87/live/1000
+ffmpeg -re -i source.flv -c:v libx265 -c:a copy -f flv -flvflags ext_header rtmp://192.168.0.1/live/1000
 ```
 * demux/拉流: 不需要格外操作，自动识别
 
