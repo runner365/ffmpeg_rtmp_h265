@@ -3,7 +3,7 @@
 1. 当前阿里云，金山云等众多cdn，已经支持hevc in rtmp/flv(采用增加codecid=12的方式)
 2. 国外大厂和国外cdn支持hevc in rtmp/flv方式：[enhanced-rtmp](https://github.com/veovera/enhanced-rtmp)
 
-<b>基于兼容上面两种hevc in rtmp/flv的方式，本库均支持。<b>
+<b>基于兼容上面两种hevc in rtmp/flv的方式，本库均支持。</b>
 
 ## 本库支持的版本(见对应的branch分支):
 * 4.1
@@ -43,6 +43,7 @@ ffmpeg -re -i source.flv -c:v libx265 -c:a copy -f flv -flvflags ext_header rtmp
 * demux/拉流: 不需要格外操作，自动识别
 
 ## 编译
+
 只需要把flv.h/flvdec.c/flvenc.c拷贝入libavformat文件夹中，后面ffmpeg正常编译即可。
 
 
