@@ -389,11 +389,11 @@ static int flv_set_video_codec(AVFormatContext *s, AVStream *vstream,
         if (is_av1_fourcc(codec_fourcc)) {
             par->codec_id = AV_CODEC_ID_AV1;
             vstreami->need_parsing = AVSTREAM_PARSE_NONE;
-            ret = 3;     // not 4, reading packet type will consume one byte
+            ret = 4;     // not 4, reading packet type will consume one byte
         } else if (is_hevc_fourcc(codec_fourcc)) {
             par->codec_id = AV_CODEC_ID_HEVC;
             vstreami->need_parsing = AVSTREAM_PARSE_NONE;
-            ret = 3;     // not 4, reading packet type will consume one byte
+            ret = 4;     // not 4, reading packet type will consume one byte
         } else {
             avpriv_request_sample(s, "Video codec (%x)", flv_codecid);
             par->codec_tag = flv_codecid;
@@ -1352,18 +1352,12 @@ retry_duration:
         st->codecpar->codec_id == AV_CODEC_ID_VP9 ||
         st->codecpar->codec_id == AV_CODEC_ID_OPUS) {
         int type;
-        size--;
 
         if (stream_type == FLV_STREAM_TYPE_VIDEO && IS_EXT_HEADER(flags)) {
-            if (EXT_HEADER_IS_SEQFRAME(flags)) {
-                type = 0;
-            } else if (EXT_HEADER_IS_ENDFRAME(flags)) {
-                type = 2;
-            } else {
-                type = 1;
-            }
+            type = GET_PACKET_TYPE(flags);
         } else {
             type = avio_r8(s->pb);
+            size--;
         }
 
         if (size < 0) {
@@ -1373,10 +1367,13 @@ retry_duration:
 
         if (st->codecpar->codec_id == AV_CODEC_ID_H264 || st->codecpar->codec_id == AV_CODEC_ID_MPEG4
             || st->codecpar->codec_id == AV_CODEC_ID_HEVC || st->codecpar->codec_id == AV_CODEC_ID_VP8
-            || st->codecpar->codec_id == AV_CODEC_ID_VP9) {
-            if (!IS_EXT_HEADER(flags)) {
+            || st->codecpar->codec_id == AV_CODEC_ID_VP9 || st->codecpar->codec_id == AV_CODEC_ID_AV1) {
+            if (!IS_EXT_HEADER(flags) || (IS_EXT_HEADER(flags) && type == PACKETTYPE_FRAMES)) {
                 // sign extension
                 int32_t cts = (avio_rb24(s->pb) + 0xff800000) ^ 0xff800000;
+                if (IS_EXT_HEADER(flags)) {
+                    size -= 3;
+                }
                 pts = av_sat_add64(dts, cts);
                 if (cts < 0) { // dts might be wrong
                     if (!flv->wrong_dts)

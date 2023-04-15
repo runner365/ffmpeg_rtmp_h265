@@ -915,8 +915,13 @@ static int flv_write_packet(AVFormatContext *s, AVPacket *pkt)
         flags_size = 2;
     else if (par->codec_id == AV_CODEC_ID_H264 || par->codec_id == AV_CODEC_ID_MPEG4 ||
              par->codec_id == AV_CODEC_ID_H265 || par->codec_id == AV_CODEC_ID_VP8 ||
-             par->codec_id == AV_CODEC_ID_VP9)
-        flags_size = 5;
+             par->codec_id == AV_CODEC_ID_VP9) {
+        if (is_flv_extern_header_enable(flv, par->codec_id) && (pkt->dts != pkt->pts)) {
+            flags_size = 8;
+        } else {
+            flags_size = 5;
+        }
+    }
     else
         flags_size = 1;
 
@@ -934,6 +939,7 @@ static int flv_write_packet(AVFormatContext *s, AVPacket *pkt)
             flv_write_codec_header(s, par, pkt->dts);
         }
     }
+
 
     if (flv->delay == AV_NOPTS_VALUE)
         flv->delay = -pkt->dts;
@@ -1072,16 +1078,23 @@ static int flv_write_packet(AVFormatContext *s, AVPacket *pkt)
             avio_w8(pb, 1); // AAC raw
         } else if (par->codec_id == AV_CODEC_ID_H264 || par->codec_id == AV_CODEC_ID_MPEG4
                 || par->codec_id == AV_CODEC_ID_HEVC || par->codec_id == AV_CODEC_ID_VP8
-                || par->codec_id == AV_CODEC_ID_VP9) {
+                || par->codec_id == AV_CODEC_ID_VP9 || par->codec_id == AV_CODEC_ID_AV1) {
             if (is_flv_extern_header_enable(flv, par->codec_id)) {
                 int fourcc_int = 0;
-                int ext_type = (par->codec_id == AV_CODEC_ID_HEVC) ? PACKETTYPE_FRAMESX : PACKETTYPE_FRAMES;
+                int ext_type = PACKETTYPE_FRAMES;
                 unsigned char is_key = (pkt->flags & AV_PKT_FLAG_KEY) ? FT_KEY : 0;
-                unsigned char type = FRAME_HEADER_EX | ext_type | is_key;
+                unsigned char type = FRAME_HEADER_EX;
 
+                if (pkt->dts == pkt->pts) {
+                    ext_type = PACKETTYPE_FRAMESX;
+                }
+                type |=  ext_type | is_key;
                 get_codec_fourcc(par->codec_id, &fourcc_int);
                 avio_w8(pb, type);
                 avio_wb32(pb, fourcc_int);
+                if (ext_type == PACKETTYPE_FRAMES) {
+                    avio_wb24(pb, pkt->pts - pkt->dts);
+                }
             } else {
                 avio_w8(pb, 1); // AVC NALU
                 avio_wb24(pb, pkt->pts - pkt->dts);

@@ -1,5 +1,5 @@
 /*
- * FLV common header
+ FLV common header
  *
  * Copyright (c) 2006 The FFmpeg Project
  *
@@ -20,9 +20,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/**
- * @file
- * FLV common header
+/*
+ *@file
+ *FLV common header
  */
 
 #ifndef AVFORMAT_FLV_H
@@ -65,8 +65,12 @@ enum packet_type_t {
 #define KEYFRAMES_BYTEOFFSET_TAG "filepositions"
 
 #define IS_EXT_HEADER(x) (((x) & FRAME_HEADER_EX) == FRAME_HEADER_EX)
+#define GET_PACKET_TYPE(x) ((x) & FLV_VIDEO_CODECID_MASK)
 #define EXT_HEADER_IS_SEQFRAME(x) (((x) & FLV_VIDEO_CODECID_MASK) == PACKETTYPE_SEQ_START)
+#define EXT_HEADER_IS_FRAMES(x) (((x) & FLV_VIDEO_CODECID_MASK) == PACKETTYPE_FRAMES)
+#define EXT_HEADER_IS_FRAMESX(x) (((x) & FLV_VIDEO_CODECID_MASK) == PACKETTYPE_FRAMESX)
 #define EXT_HEADER_IS_ENDFRAME(x) (((x) & FLV_VIDEO_CODECID_MASK) == PACKETTYPE_SEQ_END)
+
 #define EXT_HEADER_IS_KEYFRAME(x) (((x) & FLV_VIDEO_FRAMETYPE_MASK) == FT_KEY)
 #define EXT_HEADER_IS_INTERFRAME(x) (((x) & FLV_VIDEO_FRAMETYPE_MASK) == FT_INTER)
 
